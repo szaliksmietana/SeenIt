@@ -12,11 +12,14 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <Link to="/movies" className="navbar-brand">🎬 CineVault</Link>
+      <Link to="/movies" className="navbar-brand">
+        <img src="/logo.png" alt="SeenIt" className="navbar-logo" />
+      </Link>
       {user && (
         <div className="navbar-links">
           <Link to="/movies">Filmy</Link>
-          <Link to="/movies/add">Dodaj</Link>
+          {/* Dodawanie filmów tylko dla admina (CMS) */}
+          {user.role === 'admin' && <Link to="/movies/add">Dodaj</Link>}
           <Link to="/watchlist">Do obejrzenia</Link>
           <Link to="/profile">Profil</Link>
           <span className="navbar-user">{user.username}</span>

@@ -9,6 +9,7 @@ export interface User {
   username: string;
   email: string;
   full_name: string | null;
+  role: 'user' | 'admin'; // admin = może zarządzać filmami (panel CMS)
 }
 
 export interface Movie {
@@ -60,13 +61,17 @@ function seed() {
   }
   if (!localStorage.getItem('mock_users')) {
     save<(User & { password: string })[]>('mock_users', [
-      { id: 1, username: 'demo', email: 'demo@cinevault.pl',
-        full_name: 'Konto Demo', password: 'Demo1234' },
+      { id: 1, username: 'demo', email: 'demo@seenit.pl',
+        full_name: 'Konto Demo', role: 'admin', password: 'Demo1234' },
     ]);
   }
   if (!localStorage.getItem('mock_watchlist')) {
     save<WatchlistItem[]>('mock_watchlist', []);
   }
+  // Migracja starszych danych: jeśli konto demo nie ma jeszcze roli, nadaj mu admina.
+  const users = load<(User & { password: string })[]>('mock_users', []);
+  const demo = users.find((u) => u.username === 'demo');
+  if (demo && !demo.role) { demo.role = 'admin'; save('mock_users', users); }
 }
 seed();
 
@@ -82,7 +87,8 @@ export const authApi = {
       throw new Error('Nazwa użytkownika jest już zajęta');
     if (users.some((u) => u.email === data.email))
       throw new Error('Email jest już zajęty');
-    const user = { id: nextId(users), ...data, full_name: data.full_name ?? null };
+    // Nowe konta zakładane przez formularz są zwykłymi użytkownikami.
+    const user = { id: nextId(users), ...data, full_name: data.full_name ?? null, role: 'user' as const };
     users.push(user);
     save('mock_users', users);
     return user;
@@ -96,7 +102,8 @@ export const authApi = {
     const token = `mock-token-${user.id}-${Date.now()}`;
     localStorage.setItem('token', token);
     localStorage.setItem('current_user', JSON.stringify({
-      id: user.id, username: user.username, email: user.email, full_name: user.full_name,
+      id: user.id, username: user.username, email: user.email,
+      full_name: user.full_name, role: user.role,
     }));
     return { access_token: token };
   },

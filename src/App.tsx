@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -19,14 +20,18 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Chronione JWT */}
+          {/* Dostępne dla każdego zalogowanego */}
           <Route element={<PrivateRoute />}>
             <Route path="/movies" element={<MovieList />} />
-            <Route path="/movies/add" element={<MovieForm mode="create" />} />
             <Route path="/movies/:id" element={<MovieDetails />} />
-            <Route path="/movies/:id/edit" element={<MovieForm mode="edit" />} />
             <Route path="/watchlist" element={<Watchlist />} />
             <Route path="/profile" element={<Profile />} />
+          </Route>
+
+          {/* Panel CMS — tylko admin może dodawać i edytować */}
+          <Route element={<AdminRoute />}>
+            <Route path="/movies/add" element={<MovieForm mode="create" />} />
+            <Route path="/movies/:id/edit" element={<MovieForm mode="edit" />} />
           </Route>
 
           <Route path="/" element={<Navigate to="/movies" replace />} />

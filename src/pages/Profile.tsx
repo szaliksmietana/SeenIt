@@ -33,6 +33,9 @@ export default function Profile() {
     <div className="form-card">
       <h1>Profil</h1>
       <p className="muted">Zalogowany jako <strong>{user?.username}</strong></p>
+      <p className="muted">
+        Rola: <strong>{user?.role === 'admin' ? 'Administrator' : 'Użytkownik'}</strong>
+      </p>
 
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         <div className="field">

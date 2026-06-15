@@ -1,4 +1,4 @@
-# CineVault — frontend
+# SeenIt — frontend
 
 Baza filmów i seriali. SPA napisane w React + TypeScript + Vite.
 
@@ -24,12 +24,18 @@ Otwórz http://localhost:5173 w przeglądarce.
 
 ### Konto demo
 
-Aplikacja tworzy gotowe konto przy pierwszym uruchomieniu:
+Aplikacja tworzy gotowe konto **administratora** przy pierwszym uruchomieniu:
 
 - login: `demo`
 - hasło: `Demo1234`
+- rola: `admin` (ma dostęp do panelu CMS — dodawanie/edycja/usuwanie filmów)
 
-Możesz też założyć własne przez stronę rejestracji.
+Konta zakładane przez stronę rejestracji są zwykłymi użytkownikami (rola
+`user`) — mogą przeglądać filmy i prowadzić własną listę „do obejrzenia",
+ale nie zmieniają zawartości bazy.
+
+> Jeśli logo lub rola admina nie pojawia się po aktualizacji, wyczyść dane
+> strony w przeglądarce (localStorage) i odśwież — dane seedują się od nowa.
 
 ## Pozostałe komendy
 
@@ -46,6 +52,8 @@ frontend/
 ├── vite.config.ts          konfiguracja Vite
 ├── tsconfig.json           konfiguracja TypeScript
 ├── package.json            zależności i skrypty
+├── public/
+│   └── logo.png            logo SeenIt (favicon + navbar)
 └── src/
     ├── main.tsx            bootstrap Reacta (router, auth, toasty)
     ├── App.tsx             definicje tras (routing)
@@ -55,8 +63,9 @@ frontend/
     ├── context/
     │   └── AuthContext.tsx globalny stan logowania
     ├── components/
-    │   ├── Navbar.tsx      górne menu
-    │   └── PrivateRoute.tsx ochrona tras (wymaga logowania)
+    │   ├── Navbar.tsx       górne menu
+    │   ├── PrivateRoute.tsx ochrona tras (wymaga logowania)
+    │   └── AdminRoute.tsx   ochrona tras CMS (wymaga roli admina)
     └── pages/
         ├── Login.tsx       logowanie (formularz z walidacją)
         ├── Register.tsx    rejestracja (formularz z walidacją)
@@ -77,6 +86,27 @@ frontend/
 6. `/movies/:id/edit` — edycja
 7. `/watchlist` — lista do obejrzenia
 8. `/profile` — profil (bonus, ósma podstrona)
+
+## Prosty CMS (role i panel administracyjny)
+
+Aplikacja rozróżnia dwie role użytkownika (pole `role` w danych użytkownika):
+
+- **`admin`** — zarządza zawartością bazy: dodaje, edytuje i usuwa filmy/seriale.
+- **`user`** — tylko przegląda filmy i prowadzi własną listę „do obejrzenia".
+
+Jak to działa w kodzie (celowo prosto, bez zewnętrznych bibliotek):
+
+- Rola jest zapisana przy użytkowniku w `src/api/services.ts` (konto `demo`
+  dostaje `admin`, rejestracja nadaje `user`).
+- Trasy edycyjne (`/movies/add`, `/movies/:id/edit`) chroni komponent
+  `src/components/AdminRoute.tsx` — działa jak `PrivateRoute`, ale dodatkowo
+  sprawdza `user.role === 'admin'` i przekierowuje pozostałych na listę filmów.
+- W interfejsie przyciski „Dodaj", „Edytuj", „Usuń" pojawiają się tylko dla
+  admina (proste `{user.role === 'admin' && ...}` w `Navbar`, `MovieList`,
+  `MovieDetails`).
+
+Dzięki temu zwykły użytkownik nie zobaczy ani nie wywoła operacji
+zmieniających bazę — to jest właśnie warstwa CMS.
 
 ## Formularze z walidacją
 

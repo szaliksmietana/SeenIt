@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { moviesApi, Movie } from '../api/services';
+import { useAuth } from '../context/AuthContext';
 
 export default function MovieList() {
+  const { user } = useAuth();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -27,7 +29,9 @@ export default function MovieList() {
     <div>
       <div className="page-header">
         <h1>Filmy i seriale</h1>
-        <Link to="/movies/add" className="btn btn-primary">+ Dodaj</Link>
+        {user?.role === 'admin' && (
+          <Link to="/movies/add" className="btn btn-primary">+ Dodaj</Link>
+        )}
       </div>
 
       <div className="filters">

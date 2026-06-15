@@ -38,7 +38,8 @@ a:hover { text-decoration: underline; }
   background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
-.navbar-brand { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+.navbar-brand { display: flex; align-items: center; }
+.navbar-logo { height: 40px; width: auto; display: block; border-radius: 8px; }
 .navbar-links { display: flex; align-items: center; gap: 1.25rem; }
 .navbar-links a { color: var(--muted); }
 .navbar-links a:hover { color: var(--text); text-decoration: none; }

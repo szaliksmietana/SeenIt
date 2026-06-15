@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { moviesApi, watchlistApi, Movie } from '../api/services';
+import { useAuth } from '../context/AuthContext';
 
 export default function MovieDetails() {
+  const { user } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const [movie, setMovie] = useState<Movie | null>(null);
@@ -61,8 +63,13 @@ export default function MovieDetails() {
 
       <div className="detail-actions">
         <button onClick={handleAddToWatchlist} className="btn">+ Do obejrzenia</button>
-        <Link to={`/movies/${movie.id}/edit`} className="btn">Edytuj</Link>
-        <button onClick={handleDelete} className="btn btn-danger">Usuń</button>
+        {/* Edycja i usuwanie tylko dla admina (CMS) */}
+        {user?.role === 'admin' && (
+          <>
+            <Link to={`/movies/${movie.id}/edit`} className="btn">Edytuj</Link>
+            <button onClick={handleDelete} className="btn btn-danger">Usuń</button>
+          </>
+        )}
       </div>
     </div>
   );
