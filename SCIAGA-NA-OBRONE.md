@@ -78,6 +78,63 @@ To udawany backend. Trzyma dane w `localStorage` i każda funkcja zwraca `Promis
 używamy `await`. Gdy powstanie prawdziwy backend, podmieniamy tylko ten plik —
 reszta aplikacji zostaje bez zmian, bo nie wie, skąd pochodzą dane.
 
+## Uprawnienia — kto co może
+
+Rozróżniamy dwie role: **admin** i **user**. Podział obowiązków:
+
+- **Admin** zarządza treścią: dodaje, edytuje i usuwa filmy/seriale. Robi to
+  z panelu CMS (`/admin`) lub formularza (`/movies/add`, `/movies/:id/edit`).
+- **Zwykły użytkownik** korzysta z treści: dodaje filmy do listy do obejrzenia,
+  oznacza je jako obejrzane, ocenia i pisze recenzje.
+
+Dodawanie/edycja są chronione w trzech miejscach (tak jak panel CMS):
+link w menu widoczny tylko dla admina, trasa z `requiresAdmin` w routerze,
+oraz przyciski Edytuj/Usuń na stronie filmu pokazywane tylko adminowi
+(`v-if="user?.role === 'admin'"`).
+
+## Recenzje i oceny
+
+Recenzja to ocena 1–10 plus opcjonalny tekst. Zasady:
+
+- Jeden użytkownik = jedna recenzja na film (mock to pilnuje).
+- Recenzje są w osobnym magazynie `mock_reviews` w `localStorage`.
+- Średnia ocena filmu (`avg_rating`) jest **przeliczana** z recenzji za każdym
+  razem, gdy ktoś doda/zmieni/usunie recenzję — robi to funkcja `recomputeAvg`
+  w `services.ts`.
+- Na stronie filmu (`MovieDetails.vue`) jest formularz: jeśli użytkownik nie ma
+  jeszcze recenzji — dodaje nową, jeśli ma — edytuje istniejącą.
+
+## Filtr filmy / seriale (zakładki)
+
+Na liście filmów i na liście do obejrzenia są trzy zakładki: Wszystkie / Filmy /
+Seriale. Zmienna `type` trzyma wybór (`''`, `'movie'`, `'series'`).
+
+- Na liście filmów filtr idzie do API (`moviesApi.list({ media_type })`).
+- Na liście do obejrzenia filtrujemy już pobrane dane przez `computed` —
+  `filtered` to lista zawężona do wybranego typu.
+
+## Wygląd — Bootstrap 5
+
+Cały wygląd opiera się na **Bootstrapie 5** (gotowy framework CSS). Włączamy go
+jedną linią w `main.ts` (`import 'bootstrap/dist/css/bootstrap.min.css'`).
+Tryb ciemny to wbudowana funkcja Bootstrapa — atrybut `data-bs-theme="dark"`
+na znaczniku `<html>` w `index.html`, nic własnego.
+
+Najczęstsze klasy, które widać w szablonach:
+- `container`, `row`, `col` — układ i siatka responsywna,
+- `card`, `card-body` — kafelki (filmy, formularze, recenzje),
+- `btn btn-primary`, `btn-outline-secondary`, `btn-outline-danger` — przyciski,
+- `form-control`, `form-select`, `form-label` — pola formularzy,
+- `is-invalid` + `invalid-feedback` — pokazywanie błędów walidacji (czerwone),
+- `table table-hover` — tabele w panelu CMS,
+- `nav nav-pills` — zakładki filmy/seriale,
+- `list-group` — lista do obejrzenia,
+- `badge` — etykiety (ocena, rola użytkownika).
+
+Własnego CSS jest minimum — plik `style.css` ma tylko dwie klasy
+(`.poster`, `.poster-lg`) na kafelki z emoji zamiast plakatów, bo tego
+Bootstrap nie ma gotowego.
+
 ## Dlaczego Vue, a nie React?
 
 Uczciwa odpowiedź: czytelny podział pliku na logikę i szablon, a szablon

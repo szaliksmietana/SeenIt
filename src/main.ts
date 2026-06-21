@@ -1,10 +1,10 @@
 import { createApp } from 'vue';
 import Vue3Toastify, { type ToastContainerOptions } from 'vue3-toastify';
 import 'vue3-toastify/dist/index.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import App from './App.vue';
 import router from './router';
 import { useAuth } from './stores/auth';
-import './style.css';
 
 // Najpierw sprawdzamy token (init), a dopiero potem montujemy aplikację.
 // Dzięki temu strażnik tras od razu wie, czy ktoś jest zalogowany.

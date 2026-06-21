@@ -6,7 +6,6 @@ import { useAuth } from '../stores/auth';
 
 const { user, refreshUser } = useAuth();
 
-// Wypełniamy formularz aktualnymi danymi użytkownika.
 const form = reactive({
   full_name: user.value?.full_name || '',
   email: user.value?.email || '',
@@ -37,23 +36,25 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="form-card">
-    <h1>Profil</h1>
-    <p class="muted">Zalogowany jako <strong>{{ user?.username }}</strong></p>
+  <div class="card mx-auto" style="max-width: 440px">
+    <div class="card-body">
+      <h1 class="h4 mb-1">Profil</h1>
+      <p class="text-secondary">Zalogowany jako <strong>{{ user?.username }}</strong></p>
 
-    <form @submit.prevent="onSubmit" novalidate>
-      <div class="field">
-        <label>Imię i nazwisko</label>
-        <input v-model="form.full_name" />
-      </div>
-      <div class="field">
-        <label>Email</label>
-        <input v-model="form.email" type="email" />
-        <span v-if="errors.email" class="error">{{ errors.email }}</span>
-      </div>
-      <button type="submit" class="btn btn-primary" :disabled="submitting">
-        {{ submitting ? 'Zapisywanie...' : 'Zapisz zmiany' }}
-      </button>
-    </form>
+      <form @submit.prevent="onSubmit" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Imię i nazwisko</label>
+          <input v-model="form.full_name" class="form-control" />
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input v-model="form.email" type="email" class="form-control" :class="{ 'is-invalid': errors.email }" />
+          <div class="invalid-feedback">{{ errors.email }}</div>
+        </div>
+        <button type="submit" class="btn btn-primary" :disabled="submitting">
+          {{ submitting ? 'Zapisywanie...' : 'Zapisz zmiany' }}
+        </button>
+      </form>
+    </div>
   </div>
 </template>

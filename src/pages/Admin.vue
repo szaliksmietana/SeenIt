@@ -3,13 +3,10 @@ import { ref, onMounted } from 'vue';
 import { toast } from 'vue3-toastify';
 import { moviesApi, adminApi, type Movie, type User } from '../api/services';
 
-// Panel CMS — dostępny tylko dla administratora (pilnuje tego router).
-// Pozwala przeglądać i usuwać filmy oraz użytkowników.
 const movies = ref<Movie[]>([]);
 const users = ref<User[]>([]);
 const loading = ref(true);
 
-// Pobiera jednocześnie filmy i użytkowników.
 async function fetchData() {
   loading.value = true;
   const [m, u] = await Promise.all([moviesApi.list(), adminApi.allUsers()]);
@@ -36,26 +33,37 @@ async function deleteUser(id: number) {
 </script>
 
 <template>
-  <p v-if="loading" class="loader">Ładowanie...</p>
+  <p v-if="loading" class="text-center text-secondary py-5">Ładowanie...</p>
 
   <div v-else>
-    <h1>Panel CMS</h1>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h3 mb-0">Panel CMS</h1>
+      <RouterLink to="/movies/add" class="btn btn-primary">+ Dodaj film</RouterLink>
+    </div>
 
     <!-- Liczniki treści -->
-    <div class="stats">
-      <div class="stat-box">
-        <span class="stat-num">{{ movies.length }}</span>
-        <span class="stat-label">Filmy / seriale</span>
+    <div class="row g-3 mb-4">
+      <div class="col">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="display-6 fw-bold text-primary">{{ movies.length }}</div>
+            <div class="text-secondary small">Filmy / seriale</div>
+          </div>
+        </div>
       </div>
-      <div class="stat-box">
-        <span class="stat-num">{{ users.length }}</span>
-        <span class="stat-label">Użytkownicy</span>
+      <div class="col">
+        <div class="card text-center">
+          <div class="card-body">
+            <div class="display-6 fw-bold text-primary">{{ users.length }}</div>
+            <div class="text-secondary small">Użytkownicy</div>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- Tabela filmów -->
-    <h2 class="admin-section">Filmy i seriale</h2>
-    <table class="admin-table">
+    <h2 class="h5 mb-2">Filmy i seriale</h2>
+    <table class="table table-hover align-middle">
       <thead>
         <tr><th>ID</th><th>Tytuł</th><th>Rok</th><th>Typ</th><th></th></tr>
       </thead>
@@ -65,14 +73,16 @@ async function deleteUser(id: number) {
           <td>{{ m.title }}</td>
           <td>{{ m.year }}</td>
           <td>{{ m.media_type === 'series' ? 'Serial' : 'Film' }}</td>
-          <td><button @click="deleteMovie(m.id)" class="btn btn-sm btn-danger">Usuń</button></td>
+          <td class="text-end">
+            <button @click="deleteMovie(m.id)" class="btn btn-sm btn-outline-danger">Usuń</button>
+          </td>
         </tr>
       </tbody>
     </table>
 
     <!-- Tabela użytkowników -->
-    <h2 class="admin-section">Użytkownicy</h2>
-    <table class="admin-table">
+    <h2 class="h5 mb-2 mt-4">Użytkownicy</h2>
+    <table class="table table-hover align-middle">
       <thead>
         <tr><th>ID</th><th>Login</th><th>Email</th><th>Rola</th><th></th></tr>
       </thead>
@@ -81,14 +91,15 @@ async function deleteUser(id: number) {
           <td>{{ u.id }}</td>
           <td>{{ u.username }}</td>
           <td>{{ u.email }}</td>
-          <td>{{ u.role === 'admin' ? 'Administrator' : 'Użytkownik' }}</td>
           <td>
-            <!-- Administratora nie da się usunąć, żeby nie zablokować panelu. -->
-            <button
-              v-if="u.role !== 'admin'"
-              @click="deleteUser(u.id)"
-              class="btn btn-sm btn-danger"
-            >Usuń</button>
+            <span class="badge" :class="u.role === 'admin' ? 'text-bg-primary' : 'text-bg-secondary'">
+              {{ u.role === 'admin' ? 'Administrator' : 'Użytkownik' }}
+            </span>
+          </td>
+          <td class="text-end">
+            <button v-if="u.role !== 'admin'" @click="deleteUser(u.id)" class="btn btn-sm btn-outline-danger">
+              Usuń
+            </button>
           </td>
         </tr>
       </tbody>

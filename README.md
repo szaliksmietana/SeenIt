@@ -1,6 +1,6 @@
 # SeenIt
 
-Baza filmów i seriali. SPA napisane w **Vue 3 + TypeScript + Vite**.
+Baza filmów i seriali. SPA napisane w **Vue 3 + TypeScript + Vite + Bootstrap 5**.
 
 Na tym etapie aplikacja działa **samodzielnie** — nie potrzebuje backendu.
 Dane (użytkownicy, filmy, watchlista) trzymane są w `localStorage` przeglądarki
@@ -43,7 +43,7 @@ npm run preview    # podgląd buildu produkcyjnego
 └── src/
     ├── main.ts             bootstrap aplikacji (router, toasty, init)
     ├── App.vue             korzeń aplikacji (navbar + RouterView)
-    ├── style.css           style globalne (czysty CSS, dark theme)
+    ├── style.css           drobne uzupełnienia do Bootstrapa (kafelki na emoji)
     ├── api/
     │   └── services.ts     MOCK API — tu podmienisz na prawdziwy backend
     ├── stores/
@@ -89,4 +89,4 @@ oraz pozwala usuwać filmy i konta użytkowników (poza kontem administratora).
 - **Vite** — bundler i serwer deweloperski
 - **Vue Router 4** — routing SPA + strażnik tras
 - **vue3-toastify** — powiadomienia
-- **czysty CSS** — bez frameworka (dark theme)
+- **Bootstrap 5** — gotowy framework CSS (tryb ciemny `data-bs-theme="dark"`)

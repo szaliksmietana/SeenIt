@@ -34,6 +34,17 @@ export interface WatchlistItem {
   movie: Movie;
 }
 
+// Recenzja = ocena (1–10) plus opcjonalny tekst. Należy do użytkownika i filmu.
+export interface Review {
+  id: number;
+  movie_id: number;
+  user_id: number;
+  username: string;   // zapisujemy nazwę autora, żeby pokazać ją bez dociągania
+  rating: number;     // ocena 1–10
+  content: string;    // treść recenzji (może być pusta)
+  created_at: string;
+}
+
 // Sztuczne opóźnienie, żeby działało jak prawdziwa sieć.
 const delay = (ms = 250) => new Promise((r) => setTimeout(r, ms));
 
@@ -76,6 +87,9 @@ function seed() {
   }
   if (!localStorage.getItem('mock_watchlist')) {
     save<WatchlistItem[]>('mock_watchlist', []);
+  }
+  if (!localStorage.getItem('mock_reviews')) {
+    save<Review[]>('mock_reviews', []);
   }
 }
 seed();
@@ -219,6 +233,93 @@ export const watchlistApi = {
   async remove(id: number): Promise<void> {
     await delay();
     save('mock_watchlist', load<WatchlistItem[]>('mock_watchlist', []).filter((i) => i.id !== id));
+  },
+};
+
+// ── Recenzje i oceny ────────────────────────────────────────────────────────
+// Zwykły użytkownik może ocenić film i napisać recenzję (jedną na film).
+
+// Przelicza średnią ocenę filmu na podstawie wszystkich jego recenzji.
+// Wywoływane po każdej zmianie recenzji, żeby movie.avg_rating był aktualny.
+function recomputeAvg(movieId: number) {
+  const reviews = load<Review[]>('mock_reviews', []).filter((r) => r.movie_id === movieId);
+  const movies = load<Movie[]>('mock_movies', []);
+  const movie = movies.find((m) => m.id === movieId);
+  if (!movie) return;
+  if (reviews.length === 0) {
+    movie.avg_rating = null;
+  } else {
+    const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+    movie.avg_rating = Math.round((sum / reviews.length) * 10) / 10; // zaokrąglenie do 1 miejsca
+  }
+  save('mock_movies', movies);
+}
+
+// Odczytuje zalogowanego użytkownika (potrzebny przy tworzeniu recenzji).
+function currentUser(): User {
+  const raw = localStorage.getItem('current_user');
+  if (!raw) throw new Error('Musisz być zalogowany');
+  return JSON.parse(raw);
+}
+
+export const reviewsApi = {
+  // Wszystkie recenzje danego filmu, od najnowszej.
+  async listForMovie(movieId: number): Promise<Review[]> {
+    await delay();
+    return load<Review[]>('mock_reviews', [])
+      .filter((r) => r.movie_id === movieId)
+      .sort((a, b) => b.id - a.id);
+  },
+
+  // Recenzja zalogowanego użytkownika dla danego filmu (albo null, jeśli brak).
+  async mine(movieId: number): Promise<Review | null> {
+    await delay(100);
+    const user = currentUser();
+    return load<Review[]>('mock_reviews', [])
+      .find((r) => r.movie_id === movieId && r.user_id === user.id) ?? null;
+  },
+
+  // Dodaje recenzję. Jeden użytkownik = jedna recenzja na film.
+  async create(data: { movie_id: number; rating: number; content: string }): Promise<Review> {
+    await delay();
+    const user = currentUser();
+    const reviews = load<Review[]>('mock_reviews', []);
+    if (reviews.some((r) => r.movie_id === data.movie_id && r.user_id === user.id))
+      throw new Error('Już oceniłeś ten film');
+    const review: Review = {
+      id: nextId(reviews),
+      movie_id: data.movie_id,
+      user_id: user.id,
+      username: user.username,
+      rating: data.rating,
+      content: data.content,
+      created_at: new Date().toISOString(),
+    };
+    reviews.push(review);
+    save('mock_reviews', reviews);
+    recomputeAvg(data.movie_id); // odśwież średnią ocenę filmu
+    return review;
+  },
+
+  // Edycja własnej recenzji.
+  async update(id: number, data: { rating: number; content: string }): Promise<Review> {
+    await delay();
+    const reviews = load<Review[]>('mock_reviews', []);
+    const idx = reviews.findIndex((r) => r.id === id);
+    if (idx < 0) throw new Error('Recenzja nie istnieje');
+    reviews[idx] = { ...reviews[idx], ...data };
+    save('mock_reviews', reviews);
+    recomputeAvg(reviews[idx].movie_id);
+    return reviews[idx];
+  },
+
+  // Usunięcie własnej recenzji.
+  async remove(id: number): Promise<void> {
+    await delay();
+    const reviews = load<Review[]>('mock_reviews', []);
+    const review = reviews.find((r) => r.id === id);
+    save('mock_reviews', reviews.filter((r) => r.id !== id));
+    if (review) recomputeAvg(review.movie_id);
   },
 };
 

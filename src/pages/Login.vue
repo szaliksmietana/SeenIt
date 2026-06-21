@@ -7,13 +7,10 @@ import { useAuth } from '../stores/auth';
 const { login } = useAuth();
 const router = useRouter();
 
-// Dane formularza (reaktywne — powiązane z polami przez v-model).
 const form = reactive({ username: '', password: '' });
-// Błędy walidacji dla każdego pola.
 const errors = reactive({ username: '', password: '' });
 const submitting = ref(false);
 
-// Sprawdza pola i wypełnia errors. Zwraca true, jeśli wszystko OK.
 function validate(): boolean {
   errors.username = form.username ? '' : 'Pole wymagane';
   errors.password = form.password ? '' : 'Pole wymagane';
@@ -36,32 +33,35 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="auth-card">
-    <h1>Logowanie</h1>
-    <p class="hint">
-      Admin: <strong>admin</strong> / <strong>Admin1234</strong><br />
-      Zwykły użytkownik: <strong>demo</strong> / <strong>Demo1234</strong>
-    </p>
+  <div class="card mx-auto" style="max-width: 440px">
+    <div class="card-body">
+      <h1 class="h4 mb-3">Logowanie</h1>
+      <p class="text-secondary small">
+        Admin: <strong>admin</strong> / <strong>Admin1234</strong><br />
+        Zwykły użytkownik: <strong>demo</strong> / <strong>Demo1234</strong>
+      </p>
 
-    <!-- @submit.prevent = obsłuż wysłanie formularza, ale nie przeładowuj strony. -->
-    <form @submit.prevent="onSubmit" novalidate>
-      <div class="field">
-        <label>Nazwa użytkownika</label>
-        <input v-model="form.username" autocomplete="username" />
-        <span v-if="errors.username" class="error">{{ errors.username }}</span>
-      </div>
+      <form @submit.prevent="onSubmit" novalidate>
+        <div class="mb-3">
+          <label class="form-label">Nazwa użytkownika</label>
+          <input v-model="form.username" class="form-control" :class="{ 'is-invalid': errors.username }" autocomplete="username" />
+          <div class="invalid-feedback">{{ errors.username }}</div>
+        </div>
 
-      <div class="field">
-        <label>Hasło</label>
-        <input v-model="form.password" type="password" autocomplete="current-password" />
-        <span v-if="errors.password" class="error">{{ errors.password }}</span>
-      </div>
+        <div class="mb-3">
+          <label class="form-label">Hasło</label>
+          <input v-model="form.password" type="password" class="form-control" :class="{ 'is-invalid': errors.password }" autocomplete="current-password" />
+          <div class="invalid-feedback">{{ errors.password }}</div>
+        </div>
 
-      <button type="submit" class="btn btn-primary" :disabled="submitting">
-        {{ submitting ? 'Logowanie...' : 'Zaloguj się' }}
-      </button>
-    </form>
+        <button type="submit" class="btn btn-primary w-100" :disabled="submitting">
+          {{ submitting ? 'Logowanie...' : 'Zaloguj się' }}
+        </button>
+      </form>
 
-    <p class="switch">Nie masz konta? <RouterLink to="/register">Zarejestruj się</RouterLink></p>
+      <p class="text-center text-secondary small mt-3 mb-0">
+        Nie masz konta? <RouterLink to="/register">Zarejestruj się</RouterLink>
+      </p>
+    </div>
   </div>
 </template>

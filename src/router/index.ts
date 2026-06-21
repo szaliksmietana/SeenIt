@@ -18,10 +18,10 @@ const routes = [
   { path: '/register', component: Register },
 
   { path: '/movies', component: MovieList, meta: { requiresAuth: true } },
-  // mode jako prop decyduje, czy formularz dodaje czy edytuje.
-  { path: '/movies/add', component: MovieForm, props: { mode: 'create' }, meta: { requiresAuth: true } },
+  // Dodawanie i edycja filmów — tylko administrator (zarządzanie treścią przez CMS).
+  { path: '/movies/add', component: MovieForm, props: { mode: 'create' }, meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/movies/:id', component: MovieDetails, meta: { requiresAuth: true } },
-  { path: '/movies/:id/edit', component: MovieForm, props: { mode: 'edit' }, meta: { requiresAuth: true } },
+  { path: '/movies/:id/edit', component: MovieForm, props: { mode: 'edit' }, meta: { requiresAuth: true, requiresAdmin: true } },
   { path: '/watchlist', component: Watchlist, meta: { requiresAuth: true } },
   { path: '/profile', component: Profile, meta: { requiresAuth: true } },
 

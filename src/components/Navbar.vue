@@ -12,21 +12,30 @@ function handleLogout() {
 </script>
 
 <template>
-  <nav class="navbar">
-    <!-- Jeśli masz plik logo w public/, możesz podmienić tekst na:
-         <img src="/logo.png" alt="SeenIt" class="navbar-logo" /> -->
-    <RouterLink to="/movies" class="navbar-brand">SeenIt</RouterLink>
+  <!-- Gotowy komponent navbar z Bootstrapa. -->
+  <nav class="navbar navbar-expand bg-body-tertiary border-bottom">
+    <div class="container">
+      <!-- Jeśli masz logo w public/, podmień tekst na:
+           <img src="/logo.png" alt="SeenIt" height="28" /> -->
+      <RouterLink to="/movies" class="navbar-brand fw-bold">SeenIt</RouterLink>
 
-    <!-- Menu pokazujemy tylko zalogowanemu użytkownikowi (v-if). -->
-    <div v-if="user" class="navbar-links">
-      <RouterLink to="/movies">Filmy</RouterLink>
-      <RouterLink to="/movies/add">Dodaj</RouterLink>
-      <RouterLink to="/watchlist">Do obejrzenia</RouterLink>
-      <RouterLink to="/profile">Profil</RouterLink>
-      <!-- Link do CMS widoczny tylko dla administratora. -->
-      <RouterLink v-if="user.role === 'admin'" to="/admin">Panel CMS</RouterLink>
-      <span class="navbar-user">{{ user.username }}</span>
-      <button @click="handleLogout" class="btn btn-sm">Wyloguj</button>
+      <!-- Menu tylko dla zalogowanego użytkownika. -->
+      <ul v-if="user" class="navbar-nav ms-auto align-items-center gap-2">
+        <li class="nav-item"><RouterLink to="/movies" class="nav-link">Filmy</RouterLink></li>
+        <li class="nav-item"><RouterLink to="/watchlist" class="nav-link">Do obejrzenia</RouterLink></li>
+        <li class="nav-item"><RouterLink to="/profile" class="nav-link">Profil</RouterLink></li>
+        <!-- Dodawanie i panel CMS tylko dla administratora. -->
+        <li v-if="user.role === 'admin'" class="nav-item">
+          <RouterLink to="/movies/add" class="nav-link">Dodaj</RouterLink>
+        </li>
+        <li v-if="user.role === 'admin'" class="nav-item">
+          <RouterLink to="/admin" class="nav-link">Panel CMS</RouterLink>
+        </li>
+        <li class="nav-item"><span class="navbar-text fw-semibold">{{ user.username }}</span></li>
+        <li class="nav-item">
+          <button @click="handleLogout" class="btn btn-sm btn-outline-secondary">Wyloguj</button>
+        </li>
+      </ul>
     </div>
   </nav>
 </template>

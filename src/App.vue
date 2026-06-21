@@ -1,12 +1,11 @@
 <script setup lang="ts">
-// Główny komponent. Pokazuje pasek nawigacji na górze,
-// a pod nim RouterView — czyli aktualną podstronę wybraną przez router.
+// Główny komponent. Pasek nawigacji na górze, pod nim aktualna podstrona.
 import Navbar from './components/Navbar.vue';
 </script>
 
 <template>
   <Navbar />
-  <main class="container">
+  <main class="container py-4">
     <RouterView />
   </main>
 </template>
