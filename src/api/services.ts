@@ -179,25 +179,23 @@ export const authApi = {
 		return user;
 	},
 
-	// Edycja profilu — endpoint może jeszcze nie istnieć
+	// Edycja profilu — PUT /auth/me przyjmuje { full_name, email, password }
 	async updateProfile(data: {
 		full_name?: string;
 		email?: string;
 	}): Promise<User> {
-		try {
-			const user = await put<User>("/auth/me", data);
-			localStorage.setItem("current_user", JSON.stringify(user));
-			return user;
-		} catch (err: any) {
-			// Fallback gdy endpoint jeszcze nie istnieje — aktualizuj tylko lokalnie
-			if (err.message.includes("404") || err.message.includes("405")) {
-				const current = JSON.parse(localStorage.getItem("current_user")!);
-				const updated = { ...current, ...data };
-				localStorage.setItem("current_user", JSON.stringify(updated));
-				return updated;
-			}
-			throw err;
-		}
+		const user = await put<User>("/auth/me", data);
+		localStorage.setItem("current_user", JSON.stringify(user));
+		return user;
+	},
+
+	// Zmiana hasła — PUT /auth/me z polem password
+	// Backend widzi że password jest w body i aktualizuje hash.
+	async changePassword(data: {
+		current_password: string;
+		new_password: string;
+	}): Promise<void> {
+		await put<User>("/auth/me", { password: data.new_password });
 	},
 
 	logout() {
@@ -210,13 +208,13 @@ export const authApi = {
 
 export const moviesApi = {
 	async list(
-		filters: { search?: string; media_type?: string } = {},
+		filters: { search?: string; media_type?: "movie" | "series" | "" } = {},
 	): Promise<Movie[]> {
-		const params = new URLSearchParams();
-		if (filters.search) params.set("search", filters.search);
-		if (filters.media_type) params.set("media_type", filters.media_type);
-		const qs = params.toString() ? `?${params}` : "";
-		return get<Movie[]>(`/movies${qs}`);
+		const qs = new URLSearchParams();
+		if (filters.search) qs.set("search", filters.search);
+		if (filters.media_type) qs.set("media_type", filters.media_type);
+		const query = qs.toString() ? `?${qs.toString()}` : "";
+		return get<Movie[]>(`/movies${query}`);
 	},
 
 	async get(id: number): Promise<Movie> {
@@ -228,14 +226,7 @@ export const moviesApi = {
 	},
 
 	async update(id: number, data: Partial<Movie>): Promise<Movie> {
-		try {
-			return await put<Movie>(`/movies/${id}`, data);
-		} catch (err: any) {
-			if (err.message.includes("404") || err.message.includes("405")) {
-				throw new Error("Edycja filmów nie jest jeszcze dostępna na serwerze");
-			}
-			throw err;
-		}
+		return put<Movie>(`/movies/${id}`, data);
 	},
 
 	async remove(id: number): Promise<void> {
@@ -333,30 +324,12 @@ export const reviewsApi = {
 		id: number,
 		data: { rating: number; content: string },
 	): Promise<Review> {
-		try {
-			const review = await put<ReviewRaw>(`/reviews/${id}`, data);
-			return enrichReview(review);
-		} catch (err: any) {
-			if (err.message.includes("404") || err.message.includes("405")) {
-				throw new Error(
-					"Edycja recenzji nie jest jeszcze dostępna na serwerze",
-				);
-			}
-			throw err;
-		}
+		const review = await put<ReviewRaw>(`/reviews/${id}`, data);
+		return enrichReview(review);
 	},
 
 	async remove(id: number): Promise<void> {
-		try {
-			return await del<void>(`/reviews/${id}`);
-		} catch (err: any) {
-			if (err.message.includes("404") || err.message.includes("405")) {
-				throw new Error(
-					"Usuwanie recenzji nie jest jeszcze dostępne na serwerze",
-				);
-			}
-			throw err;
-		}
+		return del<void>(`/reviews/${id}`);
 	},
 };
 
@@ -364,27 +337,10 @@ export const reviewsApi = {
 
 export const adminApi = {
 	async allUsers(): Promise<User[]> {
-		try {
-			return await get<User[]>("/admin/users");
-		} catch (err: any) {
-			if (err.message.includes("404") || err.message.includes("405")) {
-				console.warn("Endpoint /admin/users jeszcze nie istnieje");
-				return [];
-			}
-			throw err;
-		}
+		return get<User[]>("/admin/users");
 	},
 
 	async removeUser(id: number): Promise<void> {
-		try {
-			return await del<void>(`/admin/users/${id}`);
-		} catch (err: any) {
-			if (err.message.includes("404") || err.message.includes("405")) {
-				throw new Error(
-					"Usuwanie użytkowników nie jest jeszcze dostępne na serwerze",
-				);
-			}
-			throw err;
-		}
+		return del<void>(`/admin/users/${id}`);
 	},
 };

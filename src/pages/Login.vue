@@ -62,6 +62,9 @@ async function onSubmit() {
       <p class="text-center text-secondary small mt-3 mb-0">
         Nie masz konta? <RouterLink to="/register">Zarejestruj się</RouterLink>
       </p>
+      <p class="text-center mt-1 mb-0">
+        <RouterLink to="/forgot-password" class="text-secondary small">Zapomniałem hasła</RouterLink>
+      </p>
     </div>
   </div>
 </template>
