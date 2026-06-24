@@ -15,20 +15,15 @@ tylko ten jeden plik na prawdziwe wywołania `fetch`/`axios`.
 ## Uruchomienie
 
 ```bash
-npm install        # instalacja zależności (raz)
-npm run dev        # serwer deweloperski → http://localhost:5173
+npm install      
+npm run dev       
 ```
-
-### Konta testowe
-
-- administrator (dostęp do panelu CMS): `admin` / `Admin1234`
-- zwykły użytkownik: `demo` / `Demo1234`
 
 ## Pozostałe komendy
 
 ```bash
-npm run build      # build produkcyjny do folderu dist/
-npm run preview    # podgląd buildu produkcyjnego
+npm run build     
+npm run preview    
 ```
 
 ## Struktura projektu

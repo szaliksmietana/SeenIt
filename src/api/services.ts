@@ -1,11 +1,6 @@
-// ─────────────────────────────────────────────────────────────────────────────
-// API — łączy się z backendem przez fetch.
-// Adres backendu pochodzi z pliku .env (zmienna VITE_API_URL).
-// ─────────────────────────────────────────────────────────────────────────────
 
 const BASE = import.meta.env.VITE_API_URL as string;
 
-// ── Typy danych ───────────────────────────────────────────────────────────────
 
 export interface User {
 	id: number;
@@ -28,14 +23,12 @@ export interface Movie {
 	avg_rating: number | null;
 }
 
-// Watchlist z backendu — bez zagnieżdżonego movie
 export interface WatchlistItemRaw {
 	id: number;
 	movie_id: number;
 	watched: boolean;
 }
 
-// Watchlist używany w UI — z dołączonym filmem (dociągamy osobno)
 export interface WatchlistItem {
 	id: number;
 	movie_id: number;
@@ -43,7 +36,6 @@ export interface WatchlistItem {
 	movie: Movie;
 }
 
-// Review z backendu — brak pola username
 export interface ReviewRaw {
 	id: number;
 	user_id: number;
@@ -52,7 +44,6 @@ export interface ReviewRaw {
 	content: string;
 }
 
-// Review używany w UI — z username (dociągamy z current_user gdy to nasza recenzja)
 export interface Review {
 	id: number;
 	user_id: number;
@@ -63,7 +54,6 @@ export interface Review {
 	created_at: string;
 }
 
-// ── Pomocnicze funkcje fetch ──────────────────────────────────────────────────
 
 function getToken(): string | null {
 	return localStorage.getItem("token");
@@ -78,7 +68,6 @@ function authHeaders(): HeadersInit {
 	return h;
 }
 
-// Parsuje błąd z backendu — obsługuje string i tablicę Pydantic
 function parseError(err: any): string {
 	if (typeof err.detail === "string") return err.detail;
 	if (Array.isArray(err.detail))
@@ -104,13 +93,10 @@ async function request<T>(
 			const err = await res.json();
 			message = parseError(err);
 		} catch {
-			/* ignoruj */
 		}
 		throw new Error(message);
 	}
 
-	// Backend może zwrócić 204 (brak body) albo body z tekstem przy DELETE —
-	// w obu przypadkach traktujemy to jako sukces i ignorujemy body.
 	if (res.status === 204) return undefined as T;
 
 	const contentType = res.headers.get("content-type") ?? "";
@@ -126,7 +112,6 @@ const patch = <T>(path: string, body?: unknown) =>
 	request<T>("PATCH", path, body);
 const del = <T>(path: string) => request<T>("DELETE", path);
 
-// ── Auth ──────────────────────────────────────────────────────────────────────
 
 export const authApi = {
 	async register(data: {
@@ -138,7 +123,6 @@ export const authApi = {
 		return post<User>("/auth/register", data);
 	},
 
-	// Logowanie — FastAPI używa OAuth2PasswordRequestForm (form data, nie JSON)
 	async login(username: string, password: string) {
 		const form = new URLSearchParams();
 		form.append("username", username);
@@ -147,7 +131,6 @@ export const authApi = {
 		const res = await fetch(`${BASE}/auth/login`, {
 			method: "POST",
 			body: form,
-			// Nie ustawiamy Content-Type — URLSearchParams ustawi go automatycznie
 		});
 
 		if (!res.ok) {
@@ -156,7 +139,6 @@ export const authApi = {
 				const err = await res.json();
 				message = parseError(err);
 			} catch {
-				/* ignoruj */
 			}
 			throw new Error(message);
 		}
@@ -167,7 +149,6 @@ export const authApi = {
 		};
 		localStorage.setItem("token", data.access_token);
 
-		// Dociągamy dane użytkownika i zapisujemy w localStorage
 		const user = await get<User>("/auth/me");
 		localStorage.setItem("current_user", JSON.stringify(user));
 		return data;
@@ -179,7 +160,6 @@ export const authApi = {
 		return user;
 	},
 
-	// Edycja profilu — PUT /auth/me przyjmuje { full_name, email, password }
 	async updateProfile(data: {
 		full_name?: string;
 		email?: string;
@@ -189,8 +169,6 @@ export const authApi = {
 		return user;
 	},
 
-	// Zmiana hasła — PUT /auth/me z polem password
-	// Backend widzi że password jest w body i aktualizuje hash.
 	async changePassword(data: {
 		current_password: string;
 		new_password: string;
@@ -204,7 +182,6 @@ export const authApi = {
 	},
 };
 
-// ── Filmy ─────────────────────────────────────────────────────────────────────
 
 export const moviesApi = {
 	async list(
@@ -234,28 +211,22 @@ export const moviesApi = {
 	},
 };
 
-// ── Watchlista ────────────────────────────────────────────────────────────────
-// Backend zwraca tylko { id, movie_id, watched } — bez danych filmu.
-// Dociągamy każdy film osobno i sklejamy w WatchlistItem.
 
 export const watchlistApi = {
 	async list(): Promise<WatchlistItem[]> {
 		const items = await get<WatchlistItemRaw[]>("/watchlist");
 
-		// Dociągamy dane każdego filmu — Promise.all robi to równolegle
 		const withMovies = await Promise.all(
 			items.map(async (item) => {
 				try {
 					const movie = await moviesApi.get(item.movie_id);
 					return { ...item, movie };
 				} catch {
-					// Jeśli film nie istnieje (np. usunięty) — pomijamy pozycję
 					return null;
 				}
 			}),
 		);
 
-		// Filtrujemy null (filmy których nie udało się pobrać)
 		return withMovies.filter((i): i is WatchlistItem => i !== null);
 	},
 
@@ -272,13 +243,8 @@ export const watchlistApi = {
 	},
 };
 
-// ── Recenzje ──────────────────────────────────────────────────────────────────
-// Backend: GET /reviews?movie_id=X — filtruje po movie_id (query param)
-// Brak pola username — dociągamy je z localStorage dla własnych recenzji,
-// dla cudzych używamy "Użytkownik #ID"
 
 function enrichReview(r: ReviewRaw): Review {
-	// Sprawdzamy czy to recenzja zalogowanego użytkownika
 	const raw = localStorage.getItem("current_user");
 	const currentUser: User | null = raw ? JSON.parse(raw) : null;
 	const username =
@@ -289,18 +255,16 @@ function enrichReview(r: ReviewRaw): Review {
 	return {
 		...r,
 		username,
-		created_at: new Date().toISOString(), // backend nie zwraca created_at
+		created_at: new Date().toISOString(),
 	};
 }
 
 export const reviewsApi = {
-	// Recenzje danego filmu — backend już filtruje po movie_id
 	async listForMovie(movieId: number): Promise<Review[]> {
 		const reviews = await get<ReviewRaw[]>(`/reviews?movie_id=${movieId}`);
 		return reviews.map(enrichReview);
 	},
 
-	// Recenzja zalogowanego użytkownika dla danego filmu (null jeśli brak)
 	async mine(movieId: number): Promise<Review | null> {
 		const raw = localStorage.getItem("current_user");
 		if (!raw) return null;
@@ -333,7 +297,6 @@ export const reviewsApi = {
 	},
 };
 
-// ── Panel CMS (admin) ─────────────────────────────────────────────────────────
 
 export const adminApi = {
 	async allUsers(): Promise<User[]> {

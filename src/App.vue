@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// Główny komponent. Pasek nawigacji na górze, pod nim aktualna podstrona.
 import Navbar from './components/Navbar.vue';
 </script>
 

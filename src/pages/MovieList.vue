@@ -37,7 +37,6 @@ watch([search, type], () => {
       </RouterLink>
     </div>
 
-    <!-- Zakładki Bootstrapa (nav-pills): Wszystkie / Filmy / Seriale. -->
     <ul class="nav nav-pills mb-3">
       <li class="nav-item">
         <button class="nav-link" :class="{ active: type === '' }" @click="type = ''">Wszystkie</button>
@@ -55,7 +54,6 @@ watch([search, type], () => {
     <p v-if="loading" class="text-center text-secondary py-5">Ładowanie...</p>
     <p v-else-if="movies.length === 0" class="text-center text-secondary py-5">Brak wyników.</p>
 
-    <!-- Siatka responsywna Bootstrapa. -->
     <div v-else class="row g-3">
       <div v-for="m in movies" :key="m.id" class="col-6 col-md-4 col-lg-3">
         <RouterLink :to="`/movies/${m.id}`" class="card h-100 text-decoration-none">

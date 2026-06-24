@@ -14,7 +14,6 @@ async function fetchItems() {
 
 onMounted(fetchItems);
 
-// computed = wartość wyliczana automatycznie. Tu: lista zawężona do wybranej zakładki.
 const filtered = computed(() => {
   if (!type.value) return items.value;
   return items.value.filter((i) => i.movie.media_type === type.value);

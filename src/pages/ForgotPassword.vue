@@ -2,9 +2,6 @@
 import { ref, reactive } from "vue";
 import { toast } from "vue3-toastify";
 
-// Formularz resetu hasła.
-// Na razie pokazuje komunikat że funkcja jest niedostępna —
-// wymaga endpointu po stronie backendu (np. POST /auth/reset-password).
 const form = reactive({ email: "" });
 const errors = reactive({ email: "" });
 const submitted = ref(false);
@@ -22,9 +19,6 @@ async function onSubmit() {
 	if (!validate()) return;
 	submitting.value = true;
 	try {
-		// TODO: gdy backend doda endpoint — odkomentuj:
-		// await authApi.requestPasswordReset(form.email);
-		// Na razie symulujemy sukces
 		await new Promise((r) => setTimeout(r, 600));
 		submitted.value = true;
 	} catch (err: any) {
@@ -43,7 +37,6 @@ async function onSubmit() {
 				Podaj email przypisany do konta — wyślemy link do zmiany hasła.
 			</p>
 
-			<!-- Po wysłaniu formularza -->
 			<div v-if="submitted" class="alert alert-success">
 				Jeśli konto istnieje, wysłaliśmy email z instrukcjami. Sprawdź skrzynkę
 				(i folder spam).

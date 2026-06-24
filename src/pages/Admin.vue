@@ -40,8 +40,6 @@ async function deleteUser(id: number) {
       <h1 class="h3 mb-0">Panel CMS</h1>
       <RouterLink to="/movies/add" class="btn btn-primary">+ Dodaj film</RouterLink>
     </div>
-
-    <!-- Liczniki treści -->
     <div class="row g-3 mb-4">
       <div class="col">
         <div class="card text-center">
@@ -61,7 +59,6 @@ async function deleteUser(id: number) {
       </div>
     </div>
 
-    <!-- Tabela filmów -->
     <h2 class="h5 mb-2">Filmy i seriale</h2>
     <table class="table table-hover align-middle">
       <thead>
@@ -80,7 +77,6 @@ async function deleteUser(id: number) {
       </tbody>
     </table>
 
-    <!-- Tabela użytkowników -->
     <h2 class="h5 mb-2 mt-4">Użytkownicy</h2>
     <table class="table table-hover align-middle">
       <thead>

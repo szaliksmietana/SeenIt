@@ -5,7 +5,6 @@ const { user } = useAuth();
 
 <template>
 	<div class="text-center py-5">
-		<!-- Hero -->
 		<img
 			src="../public/seenit.png"
 			alt="SeenIt"

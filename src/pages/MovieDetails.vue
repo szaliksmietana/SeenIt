@@ -171,7 +171,6 @@ async function deleteReview() {
 			</template>
 		</div>
 
-		<!-- ── Recenzje ── -->
 		<h2 class="h4 mb-3">Recenzje</h2>
 
 		<!-- Formularz oceny — tylko dla zalogowanych -->

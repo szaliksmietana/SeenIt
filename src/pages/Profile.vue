@@ -6,7 +6,6 @@ import { useAuth } from "../stores/auth";
 
 const { user, refreshUser } = useAuth();
 
-// ── Formularz danych profilu ──────────────────────────────────────────────────
 
 const profileForm = reactive({
 	full_name: user.value?.full_name || "",
@@ -40,7 +39,6 @@ async function saveProfile() {
 	}
 }
 
-// ── Formularz zmiany hasła ────────────────────────────────────────────────────
 
 const passwordForm = reactive({
 	current_password: "",
@@ -55,12 +53,10 @@ const passwordErrors = reactive({
 const savingPassword = ref(false);
 
 function validatePassword(): boolean {
-	// Stare hasło — wymagane
 	passwordErrors.current_password = passwordForm.current_password
 		? ""
 		: "Podaj aktualne hasło";
 
-	// Nowe hasło — min. 8 znaków, cyfra, wielka litera
 	if (!passwordForm.new_password)
 		passwordErrors.new_password = "Podaj nowe hasło";
 	else if (passwordForm.new_password.length < 8)
@@ -71,7 +67,6 @@ function validatePassword(): boolean {
 		passwordErrors.new_password = "Hasło musi zawierać wielką literę";
 	else passwordErrors.new_password = "";
 
-	// Potwierdzenie — musi być identyczne
 	passwordErrors.confirm_password =
 		passwordForm.confirm_password === passwordForm.new_password
 			? ""
@@ -93,7 +88,6 @@ async function changePassword() {
 			new_password: passwordForm.new_password,
 		});
 		toast.success("Hasło zostało zmienione");
-		// Czyścimy formularz po sukcesie
 		passwordForm.current_password = "";
 		passwordForm.new_password = "";
 		passwordForm.confirm_password = "";
@@ -107,7 +101,6 @@ async function changePassword() {
 
 <template>
 	<div class="mx-auto" style="max-width: 480px">
-		<!-- Dane profilu -->
 		<div class="card mb-4">
 			<div class="card-body">
 				<h1 class="h5 mb-1">Profil</h1>
@@ -141,7 +134,6 @@ async function changePassword() {
 			</div>
 		</div>
 
-		<!-- Zmiana hasła -->
 		<div class="card">
 			<div class="card-body">
 				<div class="d-flex justify-content-between align-items-center mb-3">
